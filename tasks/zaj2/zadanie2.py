@@ -77,10 +77,7 @@ def filter_animals(animal_list):
     def sortkey(animal):
         return animal['genus'], animal['name']
 
-    min_mass_list = [min_mass_dict[g]['male'] for g in genus]
-    min_mass_list += [min_mass_dict[g]['female'] for g in genus]
-
-    return sorted(min_mass_list, key=sortkey)
+    return sorted([min_mass_dict[g]['male'] for g in genus] + [min_mass_dict[g]['female'] for g in genus], key=sortkey)
 
 
 if __name__ == "__main__":
