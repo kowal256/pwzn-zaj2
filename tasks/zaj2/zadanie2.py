@@ -19,6 +19,17 @@ def load_animals(large_dataset=False):
         return pickle.load(f)
 
 
+def mass_kg(mass, unit):
+    if unit == 'kg':
+        return mass
+    if unit == 'g':
+        return mass/1000
+    if unit == 'mg':
+        return mass/1000000
+    if unit == 'Mg':
+        return mass*1000
+
+
 def filter_animals(animal_list):
     """
     Jesteś informatykiem w firmie Noe Shipping And Handling. Firma ta zajmuje
@@ -50,6 +61,27 @@ def filter_animals(animal_list):
 
     :param animal_list:
     """
+
+    genus = {a['genus'] for a in animal_list}
+
+    min_mass_dict = {g: {'male': None, 'female': None} for g in genus}
+
+    for a in animal_list:
+        if not min_mass_dict[a['genus']][a['sex']]:
+            min_mass_dict[a['genus']][a['sex']] = a
+        elif mass_kg(*min_mass_dict[a['genus']][a['sex']]['mass']) > mass_kg(*a['mass']):
+            min_mass_dict[a['genus']][a['sex']] = a
+
+    # format list according to rules (sorting by genus and name)
+
+    def sortkey(animal):
+        return animal['genus'], animal['name']
+
+    min_mass_list = [min_mass_dict[g]['male'] for g in genus]
+    min_mass_list += [min_mass_dict[g]['female'] for g in genus]
+
+    return sorted(min_mass_list, key=sortkey)
+
 
 if __name__ == "__main__":
     animals = load_animals()
