@@ -32,13 +32,32 @@ class Integrator(object):
         :rtype: List of integers
         """
 
+        coefficients = [
+            [1, 1],
+            [1, 4, 1],
+            [1, 3, 3, 1],
+            [7, 32, 12, 32, 7],
+            [19, 75, 50, 50, 75, 19],
+            [41, 216, 27, 272, 27, 216, 41],
+            [751, 3577, 1323, 2989, 2989, 1323, 3577, 751],
+            [989, 5888, -928, 10496, -4540, 10496, -928, 5888, 989],
+            [2857, 15741, 1080, 19344, 5778, 5778, 19344, 1080, 15741, 2857],
+            [16067, 106300, -48525, 272400, -260550, 427368, -260550, 272400, -48525, 106300, 16067]
+        ]
+
+        return coefficients[level-2]
+
     def __init__(self, level):
         """
         Funkcja ta inicjalizuje obiekt do działania dla danego stopnia metody NC
         Jeśli obiekt zostanie skonstruowany z parametrem 2 używa metody trapezów.
         :param level: Stopień metody NC
         """
+        self.tableofstrangenumbersinthefront = [1/2, 1/3, 3/8, 2/45, 5/288, 1/140, 7/17280, 4/14175, 9/89600, 5/299376]
+
         self.level = level
+        strangenumberinthefront = self.tableofstrangenumbersinthefront[level-2]
+        self.coefficients = [strangenumberinthefront * c for c in self.get_level_parameters(level)]
 
     def integrate(self, func, func_range, num_evaluations):
         """
@@ -64,6 +83,13 @@ class Integrator(object):
         :return: Wynik całkowania.
         :rtype: float
         """
+
+        num_intervals = math.ceil(num_evaluations/self.level)
+        interval_len = (func_range[1] - func_range[0])/num_intervals
+        intervals = [(func_range[0]+interval_len*inte, func_range[0]+interval_len*(inte+1)) for inte in range(0, num_intervals)]
+        h = interval_len/(self.level-1)
+
+        return sum([sum([h*c*func(interval[0]+nx*h) for nx, c in enumerate(self.coefficients)]) for interval in intervals])
 
 
 if __name__ == '__main__':
